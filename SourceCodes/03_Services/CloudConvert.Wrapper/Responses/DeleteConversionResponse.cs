@@ -1,9 +1,9 @@
 namespace Aliencube.CloudConvert.Wrapper.Responses
 {
     /// <summary>
-    /// This represents the convert response entity.
+    /// Represents a response from a delete conversion request.
     /// </summary>
-    public class ConvertResponse : BaseResponse
+    public class DeleteConvertResponse : BaseResponse
     {
         /// <summary>
         /// Gets or sets the HTTP status code.
@@ -14,13 +14,5 @@ namespace Aliencube.CloudConvert.Wrapper.Responses
         /// Gets or sets the error message.
         /// </summary>
         public string Error { get; set; }
-
-        /// <summary>
-        /// Gets or sets the process/status URL.
-        /// </summary>
-        /// <value>
-        /// The status URL.
-        /// </value>
-        public string Url { get; set; }
     }
 }

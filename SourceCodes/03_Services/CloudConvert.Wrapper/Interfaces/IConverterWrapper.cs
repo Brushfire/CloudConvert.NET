@@ -46,6 +46,22 @@ namespace Aliencube.CloudConvert.Wrapper.Interfaces
         Task<ConvertResponse> ConvertAsync(ConvertRequest request, string convertUrl);
 
         /// <summary>
+        /// Asynchronously gets the status of the conversion.
+        /// </summary>
+        /// <param name="statusUrl">The status URL.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">statusUrl</exception>
+        /// <exception cref="ErrorResponseException"></exception>
+        Task<ConversionStatusResponse> GetConversionStatusAsync(string statusUrl);
+
+        /// <summary>
+        /// Asynchronously delete the conversion at the specified URL.
+        /// </summary>
+        /// <param name="deleteUrl">The conversion delete URL.</param>
+        /// <returns></returns>
+        Task<DeleteConvertResponse> DeleteConversionAsync(string deleteUrl);
+
+        /// <summary>
         /// Serialises the request object in JSON format.
         /// </summary>
         /// <typeparam name="TRequest">Request object type.</typeparam>
