@@ -9,6 +9,7 @@ using Aliencube.CloudConvert.Wrapper.Options;
 using Aliencube.CloudConvert.Wrapper.Responses;
 using FluentAssertions;
 using NUnit.Framework;
+using System.Threading;
 
 namespace Aliencube.CloudConvert.Tests
 {
@@ -30,26 +31,7 @@ namespace Aliencube.CloudConvert.Tests
             this._formats = new Formats();
             this._wrapper = new ConverterWrapper(this._settings);
 
-            this._input = new InputParameters()
-                          {
-                              InputFormat = this._formats.Document.Md,
-                              InputMethod = InputMethod.Download,
-                              Filepath = "https://raw.githubusercontent.com/aliencube/CloudConvert.NET/dev/README.md",
-                              Filename = "README.md",
-                          };
-            this._output = new OutputParameters()
-                           {
-                               DownloadMethod = DownloadMethod.False,
-                               OutputStorage = OutputStorage.OneDrive,
-                           };
-            this._conversion = new ConversionParameters()
-                               {
-                                   OutputFormat = this._formats.Document.Docx,
-                                   ConverterOptions = new MarkdownConverterOptions()
-                                                      {
-                                                          InputMarkdownSyntax = MarkdownSyntaxType.Auto
-                                                      },
-                               };
+            this.SetConversionParametersToDefaults();
         }
 
         [TearDown]
@@ -133,6 +115,7 @@ namespace Aliencube.CloudConvert.Tests
             {
                 var response = await this._wrapper.ConvertAsync(this._input, this._output, this._conversion);
                 response.Code.Should().Be(200);
+                response.Url.Should().NotBeNullOrWhiteSpace();
             }
             catch (Exception ex)
             {
@@ -143,6 +126,83 @@ namespace Aliencube.CloudConvert.Tests
                 response.Should().BeOfType<ErrorResponse>();
                 response.Code.Should().NotBe(200);
             }
+        }
+
+        [Test]
+        public async void GetConversionStatus_GivenParameters_ReturnStatus()
+        {
+            try
+            {
+                ConvertResponse convertResponse = await this._wrapper.ConvertAsync(this._input, this._output, this._conversion);
+                convertResponse.Code.Should().Be(200);
+                convertResponse.Url.Should().NotBeNullOrWhiteSpace();
+
+                Thread.Sleep(2000);
+
+                ConversionStatusResponse statusResponse = await this._wrapper.GetConversionStatusAsync("https:" + convertResponse.Url);
+                statusResponse.Code.Should().Be(200);
+            }
+            catch (Exception ex)
+            {
+                var error = ex as ErrorResponseException;
+                error.Should().NotBeNull();
+
+                var response = error.Error;
+                response.Should().BeOfType<ErrorResponse>();
+                response.Code.Should().NotBe(200);
+            }
+        }
+
+        [Test]
+        public async void DeleteConversion_GivenParameters_ReturnDelete()
+        {
+            try
+            {
+                ConvertResponse convertResponse = await this._wrapper.ConvertAsync(this._input, this._output, this._conversion);
+                convertResponse.Code.Should().Be(200);
+                convertResponse.Url.Should().NotBeNullOrWhiteSpace();
+
+                Thread.Sleep(2000);
+
+                DeleteConvertResponse deleteResponse = await this._wrapper.DeleteConversionAsync("https:" + convertResponse.Url);
+                deleteResponse.Code.Should().Be(200);
+            }
+            catch (Exception ex)
+            {
+                var error = ex as ErrorResponseException;
+                error.Should().NotBeNull();
+
+                var response = error.Error;
+                response.Should().BeOfType<ErrorResponse>();
+                response.Code.Should().NotBe(200);
+            }
+        }
+
+        /// <summary>
+        /// Sets the conversion parameters to initial test defaults.
+        /// </summary>
+        private void SetConversionParametersToDefaults()
+        {
+            this._input = new InputParameters()
+            {
+                InputFormat = this._formats.Document.Md,
+                InputMethod = InputMethod.Download,
+                Filepath = "https://raw.githubusercontent.com/aliencube/CloudConvert.NET/dev/README.md",
+                Filename = "README.md",
+            };
+            this._output = new OutputParameters()
+            {
+                DownloadMethod = DownloadMethod.False,
+                OutputStorage = OutputStorage.OneDrive,
+            };
+            this._conversion = new ConversionParameters()
+            {
+                OutputFormat = this._formats.Document.Docx,
+                ConverterOptions = new MarkdownConverterOptions()
+                {
+                    InputMarkdownSyntax = MarkdownSyntaxType.Auto
+                },
+            };
         }
     }
 }

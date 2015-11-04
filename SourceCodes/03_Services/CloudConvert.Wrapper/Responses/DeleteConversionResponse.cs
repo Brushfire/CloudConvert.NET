@@ -11,8 +11,8 @@ namespace Aliencube.CloudConvert.Wrapper.Responses
         public int Code { get; set; }
 
         /// <summary>
-        /// Gets or sets the error message.
+        /// Gets or sets the message.
         /// </summary>
-        public string Error { get; set; }
+        public string Message { get; set; }
     }
 }

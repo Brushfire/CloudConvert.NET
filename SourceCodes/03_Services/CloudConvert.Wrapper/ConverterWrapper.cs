@@ -216,7 +216,6 @@ namespace Aliencube.CloudConvert.Wrapper
 
                 deserialised = this.Deserialise<ConvertResponse>(result);
                 deserialised.Code = (int)response.StatusCode;
-                deserialised.Url = convertUrl;
             }
 
             return deserialised;
@@ -250,6 +249,7 @@ namespace Aliencube.CloudConvert.Wrapper
                     }
 
                     deserialised = this.Deserialise<ConversionStatusResponse>(result);
+                    deserialised.Code = (int)response.StatusCode;
                 }
             }
 
@@ -282,6 +282,7 @@ namespace Aliencube.CloudConvert.Wrapper
                     }
 
                     deserialised = this.Deserialise<DeleteConvertResponse>(result);
+                    deserialised.Code = (int)response.StatusCode;
                 }
             }
 
