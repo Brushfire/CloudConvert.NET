@@ -30,8 +30,25 @@ namespace Aliencube.CloudConvert.Tests
             this._settings = ConverterSettings.CreateInstance();
             this._formats = new Formats();
             this._wrapper = new ConverterWrapper(this._settings);
-
-            this.SetConversionParametersToDefaults();
+            
+            this._input = new InputParameters()
+                          {
+                              InputFormat = this._formats.Website.Website,
+                              InputMethod = InputMethod.Url,
+                              Filepath = "http://www.google.com",
+                              Filename = "website",
+                          };
+            this._output = new OutputParameters()
+                           {
+                               DownloadMethod = DownloadMethod.False,
+                               OutputStorage = OutputStorage.None,
+                               Wait = true
+                           };
+            this._conversion = new ConversionParameters()
+                               {
+                                   OutputFormat = this._formats.Document.Pdf,
+                                   ConverterOptions = null
+                               };
         }
 
         [TearDown]
@@ -176,33 +193,6 @@ namespace Aliencube.CloudConvert.Tests
                 response.Should().BeOfType<ErrorResponse>();
                 response.Code.Should().NotBe(200);
             }
-        }
-
-        /// <summary>
-        /// Sets the conversion parameters to initial test defaults.
-        /// </summary>
-        private void SetConversionParametersToDefaults()
-        {
-            this._input = new InputParameters()
-            {
-                InputFormat = this._formats.Document.Md,
-                InputMethod = InputMethod.Download,
-                Filepath = "https://raw.githubusercontent.com/aliencube/CloudConvert.NET/dev/README.md",
-                Filename = "README.md",
-            };
-            this._output = new OutputParameters()
-            {
-                DownloadMethod = DownloadMethod.False,
-                OutputStorage = OutputStorage.OneDrive,
-            };
-            this._conversion = new ConversionParameters()
-            {
-                OutputFormat = this._formats.Document.Docx,
-                ConverterOptions = new MarkdownConverterOptions()
-                {
-                    InputMarkdownSyntax = MarkdownSyntaxType.Auto
-                },
-            };
-        }
+        }        
     }
 }

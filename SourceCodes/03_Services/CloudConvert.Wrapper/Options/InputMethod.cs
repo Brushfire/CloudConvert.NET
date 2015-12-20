@@ -29,5 +29,10 @@ namespace Aliencube.CloudConvert.Wrapper.Options
         /// Specifies the input source is FTP.
         /// </summary>
         Ftp,
+
+        /// <summary>
+        /// Specifies the input source is a URL.
+        /// </summary>
+        Url,
     }
 }
