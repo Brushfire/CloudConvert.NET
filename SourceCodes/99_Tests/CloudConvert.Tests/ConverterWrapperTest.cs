@@ -35,8 +35,7 @@ namespace Aliencube.CloudConvert.Tests
                           {
                               InputFormat = this._formats.Website.Website,
                               InputMethod = InputMethod.Url,
-                              Filepath = "http://www.google.com",
-                              Filename = "website",
+                              Filepath = "http://www.google.com"
                           };
             this._output = new OutputParameters()
                            {

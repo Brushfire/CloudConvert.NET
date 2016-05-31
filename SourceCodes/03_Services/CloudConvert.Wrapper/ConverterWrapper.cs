@@ -45,16 +45,19 @@ namespace Aliencube.CloudConvert.Wrapper
         /// </summary>
         private void InitialiseMapper()
         {
-            Mapper.CreateMap<InputParameters, ConvertRequest>()
-                  .ForMember(d => d.InputMethod, o => o.MapFrom(s => s.InputMethod.ToLower()));
-            Mapper.CreateMap<OutputParameters, ConvertRequest>()
-                  .ForMember(d => d.Email, o => o.MapFrom(s => s.Email ? s.Email : (bool?)null))
-                  .ForMember(d => d.OutputStorage, o => o.MapFrom(s => s.OutputStorage != OutputStorage.None ? s.OutputStorage.ToLower() : null))
-                  .ForMember(d => d.Wait, o => o.MapFrom(s => s.Wait ? s.Wait : (bool?)null))
-                  .ForMember(d => d.DownloadMethod, o => o.MapFrom(s => s.DownloadMethod.ToLower()))
-                  .ForMember(d => d.SaveToServer, o => o.MapFrom(s => s.SaveToServer ? s.SaveToServer : (bool?)null));
-            Mapper.CreateMap<ConversionParameters, ConvertRequest>()
-                  .ForMember(d => d.Timeout, o => o.MapFrom(s => s.Timeout > 0 ? s.Timeout : (int?)null));
+            Mapper.Initialize(config =>
+            {
+                config.CreateMap<InputParameters, ConvertRequest>()
+                    .ForMember(d => d.InputMethod, o => o.MapFrom(s => s.InputMethod.ToLower()));
+                config.CreateMap<OutputParameters, ConvertRequest>()
+                    .ForMember(d => d.Email, o => o.MapFrom(s => s.Email ? s.Email : (bool?)null))
+                    .ForMember(d => d.OutputStorage, o => o.MapFrom(s => s.OutputStorage != OutputStorage.None ? s.OutputStorage.ToLower() : null))
+                    .ForMember(d => d.Wait, o => o.MapFrom(s => s.Wait ? s.Wait : (bool?)null))
+                    .ForMember(d => d.DownloadMethod, o => o.MapFrom<object>(s => s.DownloadMethod == DownloadMethod.Inline ? (object)"inline" : s.DownloadMethod == DownloadMethod.True))
+                    .ForMember(d => d.SaveToServer, o => o.MapFrom(s => s.SaveToServer ? s.SaveToServer : (bool?)null));
+                config.CreateMap<ConversionParameters, ConvertRequest>()
+                    .ForMember(d => d.Timeout, o => o.MapFrom(s => s.Timeout > 0 ? s.Timeout : (int?)null));
+            });
         }
 
         /// <summary>
