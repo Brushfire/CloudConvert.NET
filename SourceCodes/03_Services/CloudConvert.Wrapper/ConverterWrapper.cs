@@ -45,16 +45,19 @@ namespace Aliencube.CloudConvert.Wrapper
         /// </summary>
         private void InitialiseMapper()
         {
-            Mapper.CreateMap<InputParameters, ConvertRequest>()
-                  .ForMember(d => d.InputMethod, o => o.MapFrom(s => s.InputMethod.ToLower()));
-            Mapper.CreateMap<OutputParameters, ConvertRequest>()
-                  .ForMember(d => d.Email, o => o.MapFrom(s => s.Email ? s.Email : (bool?)null))
-                  .ForMember(d => d.OutputStorage, o => o.MapFrom(s => s.OutputStorage != OutputStorage.None ? s.OutputStorage.ToLower() : null))
-                  .ForMember(d => d.Wait, o => o.MapFrom(s => s.Wait ? s.Wait : (bool?)null))
-                  .ForMember(d => d.DownloadMethod, o => o.MapFrom(s => s.DownloadMethod.ToLower()))
-                  .ForMember(d => d.SaveToServer, o => o.MapFrom(s => s.SaveToServer ? s.SaveToServer : (bool?)null));
-            Mapper.CreateMap<ConversionParameters, ConvertRequest>()
-                  .ForMember(d => d.Timeout, o => o.MapFrom(s => s.Timeout > 0 ? s.Timeout : (int?)null));
+            Mapper.Initialize(config =>
+            {
+                config.CreateMap<InputParameters, ConvertRequest>()
+                    .ForMember(d => d.InputMethod, o => o.MapFrom(s => s.InputMethod.ToLower()));
+                config.CreateMap<OutputParameters, ConvertRequest>()
+                    .ForMember(d => d.Email, o => o.MapFrom(s => s.Email ? s.Email : (bool?)null))
+                    .ForMember(d => d.OutputStorage, o => o.MapFrom(s => s.OutputStorage != OutputStorage.None ? s.OutputStorage.ToLower() : null))
+                    .ForMember(d => d.Wait, o => o.MapFrom(s => s.Wait ? s.Wait : (bool?)null))
+                    .ForMember(d => d.DownloadMethod, o => o.MapFrom<object>(s => s.DownloadMethod == DownloadMethod.Inline ? (object)"inline" : s.DownloadMethod == DownloadMethod.True))
+                    .ForMember(d => d.SaveToServer, o => o.MapFrom(s => s.SaveToServer ? s.SaveToServer : (bool?)null));
+                config.CreateMap<ConversionParameters, ConvertRequest>()
+                    .ForMember(d => d.Timeout, o => o.MapFrom(s => s.Timeout > 0 ? s.Timeout : (int?)null));
+            });
         }
 
         /// <summary>
@@ -213,6 +216,7 @@ namespace Aliencube.CloudConvert.Wrapper
                     var error = this.Deserialise<ErrorResponse>(result);
                     throw new ErrorResponseException(error);
                 }
+
                 deserialised = this.Deserialise<ConvertResponse>(result);
                 deserialised.Code = (int)response.StatusCode;
             }
@@ -220,6 +224,74 @@ namespace Aliencube.CloudConvert.Wrapper
             return deserialised;
         }
 
+        /// <summary>
+        /// Asynchronously gets the status of the conversion.
+        /// </summary>
+        /// <param name="statusUrl">The status URL.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">statusUrl</exception>
+        /// <exception cref="ErrorResponseException"></exception>
+        public async Task<ConversionStatusResponse> GetConversionStatusAsync(string statusUrl)
+        {
+            if (string.IsNullOrEmpty(statusUrl))
+            {
+                throw new ArgumentNullException("statusUrl");
+            }
+
+            ConversionStatusResponse deserialised;
+            using (var client = new HttpClient())
+            {                
+                using (var response = await client.GetAsync(statusUrl))
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        var error = this.Deserialise<ErrorResponse>(result);
+                        throw new ErrorResponseException(error);
+                    }
+
+                    deserialised = this.Deserialise<ConversionStatusResponse>(result);
+                    deserialised.Code = (int)response.StatusCode;
+                }
+            }
+
+            return deserialised;
+        }
+
+        /// <summary>
+        /// Asynchronously delete the conversion at the specified URL.
+        /// </summary>
+        /// <param name="deleteUrl">The conversion delete URL.</param>
+        /// <returns></returns>
+        public async Task<DeleteConvertResponse> DeleteConversionAsync(string deleteUrl)
+        {
+            if (string.IsNullOrEmpty(deleteUrl))
+            {
+                throw new ArgumentNullException("deleteUrl");
+            }
+
+            DeleteConvertResponse deserialised;
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.DeleteAsync(deleteUrl))
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        var error = this.Deserialise<ErrorResponse>(result);
+                        throw new ErrorResponseException(error);
+                    }
+
+                    deserialised = this.Deserialise<DeleteConvertResponse>(result);
+                    deserialised.Code = (int)response.StatusCode;
+                }
+            }
+
+            return deserialised;
+        }
+        
         /// <summary>
         /// Serialises the request object in JSON format.
         /// </summary>
