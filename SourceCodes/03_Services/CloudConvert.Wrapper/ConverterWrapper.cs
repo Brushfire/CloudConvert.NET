@@ -21,6 +21,7 @@ namespace Aliencube.CloudConvert.Wrapper
     public class ConverterWrapper : IConverterWrapper
     {
         private readonly IConverterSettings _settings;
+        private readonly IMapper _mapper;
 
         private bool _disposed;
 
@@ -36,27 +37,63 @@ namespace Aliencube.CloudConvert.Wrapper
             }
 
             this._settings = settings;
-
-            this.InitialiseMapper();
+            MapperConfiguration mapperConfig = this.InitializeMapper();
+            mapperConfig.AssertConfigurationIsValid();
+            this._mapper = mapperConfig.CreateMapper();
         }
 
         /// <summary>
-        /// Initialises the mapper definitions.
+        /// Initializes the mapper definitions.
         /// </summary>
-        private void InitialiseMapper()
+        private MapperConfiguration InitializeMapper()
         {
-            Mapper.Initialize(config =>
+            return new MapperConfiguration(config =>
             {
                 config.CreateMap<InputParameters, ConvertRequest>()
-                    .ForMember(d => d.InputMethod, o => o.MapFrom(s => s.InputMethod.ToLower()));
+                    .ForMember(d => d.InputMethod, o => o.MapFrom(s => s.InputMethod.ToLower()))
+                    .ForMember(d => d.Filepath, o => o.MapFrom(s => s.Filepath))
+                    .ForMember(d => d.Filename, o => o.MapFrom(s => s.Filename))
+                    .ForMember(d => d.Tag, o => o.MapFrom(s => s.Tag))
+                    .ForMember(d => d.OutputFormat, o => o.Ignore())
+                    .ForMember(d => d.ConverterOptions, o => o.Ignore())
+                    .ForMember(d => d.PresetId, o => o.Ignore())
+                    .ForMember(d => d.Timeout, o => o.Ignore())
+                    .ForMember(d => d.Email, o => o.Ignore())
+                    .ForMember(d => d.OutputStorage, o => o.Ignore())
+                    .ForMember(d => d.CallbackUrl, o => o.Ignore())
+                    .ForMember(d => d.Wait, o => o.Ignore())
+                    .ForMember(d => d.DownloadMethod, o => o.Ignore())
+                    .ForMember(d => d.SaveToServer, o => o.Ignore());
                 config.CreateMap<OutputParameters, ConvertRequest>()
+                    .ForMember(d => d.InputMethod, o => o.Ignore())
+                    .ForMember(d => d.Filepath, o => o.Ignore())
+                    .ForMember(d => d.Filename, o => o.Ignore())
+                    .ForMember(d => d.Tag, o => o.Ignore())
+                    .ForMember(d => d.OutputFormat, o => o.Ignore())
+                    .ForMember(d => d.ConverterOptions, o => o.Ignore())
+                    .ForMember(d => d.PresetId, o => o.Ignore())
+                    .ForMember(d => d.Timeout, o => o.Ignore())
                     .ForMember(d => d.Email, o => o.MapFrom(s => s.Email ? s.Email : (bool?)null))
                     .ForMember(d => d.OutputStorage, o => o.MapFrom(s => s.OutputStorage != OutputStorage.None ? s.OutputStorage.ToLower() : null))
+                    .ForMember(d => d.CallbackUrl, o => o.MapFrom(s => s.CallbackUrl))
                     .ForMember(d => d.Wait, o => o.MapFrom(s => s.Wait ? s.Wait : (bool?)null))
                     .ForMember(d => d.DownloadMethod, o => o.MapFrom<object>(s => s.DownloadMethod == DownloadMethod.Inline ? (object)"inline" : s.DownloadMethod == DownloadMethod.True))
                     .ForMember(d => d.SaveToServer, o => o.MapFrom(s => s.SaveToServer ? s.SaveToServer : (bool?)null));
                 config.CreateMap<ConversionParameters, ConvertRequest>()
-                    .ForMember(d => d.Timeout, o => o.MapFrom(s => s.Timeout > 0 ? s.Timeout : (int?)null));
+                    .ForMember(d => d.InputMethod, o => o.Ignore())
+                    .ForMember(d => d.Filepath, o => o.Ignore())
+                    .ForMember(d => d.Filename, o => o.Ignore())
+                    .ForMember(d => d.Tag, o => o.Ignore())
+                    .ForMember(d => d.OutputFormat, o => o.MapFrom(s => s.OutputFormat))
+                    .ForMember(d => d.ConverterOptions, o => o.MapFrom(s => s.ConverterOptions))
+                    .ForMember(d => d.PresetId, o => o.MapFrom(s => s.PresetId))
+                    .ForMember(d => d.Timeout, o => o.MapFrom(s => s.Timeout > 0 ? s.Timeout : (int?)null))
+                    .ForMember(d => d.Email, o => o.Ignore())
+                    .ForMember(d => d.OutputStorage, o => o.Ignore())
+                    .ForMember(d => d.CallbackUrl, o => o.Ignore())
+                    .ForMember(d => d.Wait, o => o.Ignore())
+                    .ForMember(d => d.DownloadMethod, o => o.Ignore())
+                    .ForMember(d => d.SaveToServer, o => o.Ignore()); ;
             });
         }
 
@@ -178,9 +215,9 @@ namespace Aliencube.CloudConvert.Wrapper
         /// <returns>Returns the <c>ConvertRequest</c> object.</returns>
         public ConvertRequest GetConvertRequest(InputParameters input, OutputParameters output, ConversionParameters conversion)
         {
-            var request = Mapper.Map<ConvertRequest>(input)
-                                .Map(output)
-                                .Map(conversion);
+            var request = this._mapper.Map<ConvertRequest>(input);
+            this._mapper.Map(output, request);
+            this._mapper.Map(conversion, request);
             return request;
         }
 
