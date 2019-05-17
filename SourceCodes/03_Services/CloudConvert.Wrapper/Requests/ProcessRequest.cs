@@ -19,10 +19,5 @@ namespace Aliencube.CloudConvert.Wrapper.Requests
         /// Gets or sets the output format.
         /// </summary>
         public string OutputFormat { get; set; }
-
-        /// <summary>
-        /// Gets or sets the converter
-        /// </summary>
-        public string Converter { get; set; }
     }
 }
