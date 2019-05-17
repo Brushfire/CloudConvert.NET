@@ -36,5 +36,12 @@ namespace Aliencube.CloudConvert.Wrapper.ConfigElements
             get { return (ApiKeyElement)this["apiKey"]; }
             set { this["apiKey"] = value; }
         }
+
+        [ConfigurationProperty("converter", IsRequired = false, DefaultValue = null)]
+        public string Converter
+        {
+            get { return (string)this["converter"]; }
+            set { this["converter"] = value; }
+        }
     }
 }

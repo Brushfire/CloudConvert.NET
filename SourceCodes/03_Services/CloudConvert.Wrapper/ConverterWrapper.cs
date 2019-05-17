@@ -152,6 +152,7 @@ namespace Aliencube.CloudConvert.Wrapper
             {
                 var apiKey = this._settings.Basic.ApiKey.Value;
                 var processUrl = this._settings.Basic.ProcessUrl;
+                var converter = this._settings.Basic.Converter;
 
                 if (this._settings.Basic.UseHeader)
                 {
@@ -161,6 +162,8 @@ namespace Aliencube.CloudConvert.Wrapper
                 {
                     request.ApiKey = apiKey;
                 }
+
+                if (string.IsNullOrEmpty(converter)) request.Converter = converter;
 
                 var serialised = this.Serialise(request);
                 using (var content = new StringContent(serialised, Encoding.UTF8, "application/json"))
